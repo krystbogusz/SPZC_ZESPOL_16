@@ -54,8 +54,10 @@ def mian():
     }
 
     dataset_names = list(dataframes.keys())
-    mapping = {name: f"Dataset {i+1}" for i, name in enumerate(dataset_names)}
-    legend = "\n".join([f"Dataset {i+1}: {name}" for i, name in enumerate(dataset_names)])
+    mapping = {name: f"Dataset {i + 1}" for i, name in enumerate(dataset_names)}
+    legend = "\n".join(
+        [f"Dataset {i + 1}: {name}" for i, name in enumerate(dataset_names)]
+    )
     title = "Execution Time for Feature Extraction [seconds]"
 
     for dataset_name, df in dataframes.items():
@@ -97,7 +99,7 @@ def mian():
         ax.axis("tight")
         ax.axis("off")
 
-        ax.set_title(title, fontsize=20, pad=5, fontweight='bold')
+        ax.set_title(title, fontsize=20, pad=5, fontweight="bold")
 
         table = ax.table(
             cellText=results_df.round(6).values,

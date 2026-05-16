@@ -5,20 +5,34 @@ from sklearn.pipeline import Pipeline
 
 from config import FINAL_DATASET, RUNS_DIR
 from evaluate import evaluate, get_predictions
-from plots import plot_confusion_matrix, plot_feature_importance, plot_feature_importance_using_permutation_importance
-from training_utils import load_data, compute_class_weigths, split_dataset, get_timestamp
+from plots import (
+    plot_confusion_matrix,
+    plot_feature_importance,
+    plot_feature_importance_using_permutation_importance,
+)
+from training_utils import (
+    load_data,
+    compute_class_weigths,
+    split_dataset,
+    get_timestamp,
+)
 
 
 def build_rf_pipeline(class_weights: dict) -> Pipeline:
-    return Pipeline([
-        ("scaler", StandardScaler()),
-        ("rf", RandomForestClassifier(
-            n_estimators=100,
-            class_weight=class_weights,
-            random_state=42,
-            n_jobs=-1
-        )),
-    ])
+    return Pipeline(
+        [
+            ("scaler", StandardScaler()),
+            (
+                "rf",
+                RandomForestClassifier(
+                    n_estimators=100,
+                    class_weight=class_weights,
+                    random_state=42,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
+    )
 
 
 def train_rf(X, y):
@@ -66,10 +80,19 @@ def main():
     rng = np.random.default_rng(42)
     idx = rng.choice(len(X_test), 5_000, replace=False)
 
-    plot_feature_importance_using_permutation_importance(pipeline, feature_names, X_test.iloc[idx], y_test[idx], le, current_runs_dir, model_name, n_repeats=5)
+    plot_feature_importance_using_permutation_importance(
+        pipeline,
+        feature_names,
+        X_test.iloc[idx],
+        y_test[idx],
+        le,
+        current_runs_dir,
+        model_name,
+        n_repeats=5,
+    )
 
     print("Done!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

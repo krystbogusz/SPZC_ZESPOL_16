@@ -5,20 +5,35 @@ from sklearn.linear_model import LogisticRegression
 
 from config import RUNS_DIR, FINAL_DATASET
 from evaluate import evaluate, get_predictions
-from plots import plot_feature_importance, plot_confusion_matrix, plot_feature_importance_using_permutation_importance
-from training_utils import get_timestamp, load_data, split_dataset, compute_class_weigths
+from plots import (
+    plot_feature_importance,
+    plot_confusion_matrix,
+    plot_feature_importance_using_permutation_importance,
+)
+from training_utils import (
+    get_timestamp,
+    load_data,
+    split_dataset,
+    compute_class_weigths,
+)
 
 
 def build_lr_pipeline(class_weights: dict) -> Pipeline:
-    return Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", LogisticRegression(
-            C=1.0,
-            max_iter=1000,
-            class_weight=class_weights,
-            solver="saga",
-            random_state=42)),
-        ])
+    return Pipeline(
+        [
+            ("scaler", StandardScaler()),
+            (
+                "clf",
+                LogisticRegression(
+                    C=1.0,
+                    max_iter=1000,
+                    class_weight=class_weights,
+                    solver="saga",
+                    random_state=42,
+                ),
+            ),
+        ]
+    )
 
 
 def train_lr(X, y):
@@ -66,10 +81,19 @@ def main():
     rng = np.random.default_rng(42)
     idx = rng.choice(len(X_test), 5_000, replace=False)
 
-    plot_feature_importance_using_permutation_importance(pipeline, feature_names, X_test.iloc[idx], y_test[idx], le, current_runs_dir, model_name, n_repeats=5)
+    plot_feature_importance_using_permutation_importance(
+        pipeline,
+        feature_names,
+        X_test.iloc[idx],
+        y_test[idx],
+        le,
+        current_runs_dir,
+        model_name,
+        n_repeats=5,
+    )
 
     print("Done!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

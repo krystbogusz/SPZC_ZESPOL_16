@@ -5,7 +5,7 @@ from pathlib import Path
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.inspection import permutation_importance
-from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, f1_score, make_scorer
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, f1_score
 
 
 def plot_confusion_matrix(y_test, y_pred, output_dir: Path, model_name: str, le):
@@ -24,7 +24,9 @@ def plot_confusion_matrix(y_test, y_pred, output_dir: Path, model_name: str, le)
     plt.close(fig)
 
 
-def plot_feature_importance(pipeline, feature_names, output_dir: Path, model_name: str, top_n: int = 10):
+def plot_feature_importance(
+    pipeline, feature_names, output_dir: Path, model_name: str, top_n: int = 10
+):
     model = pipeline[-1] if hasattr(pipeline, "steps") else pipeline
 
     if hasattr(model, "coef_"):
@@ -50,7 +52,8 @@ def plot_feature_importance(pipeline, feature_names, output_dir: Path, model_nam
 
     n_plots = len(importances)
     fig, axes = plt.subplots(
-        1, n_plots,
+        1,
+        n_plots,
         figsize=(5 * n_plots, 5),
         squeeze=False,
     )
@@ -61,10 +64,7 @@ def plot_feature_importance(pipeline, feature_names, output_dir: Path, model_nam
 
         idx = np.argsort(np.abs(imp_array))[-top_n:]
 
-        colors = [
-            "#C44E52" if v < 0 else cmap_color
-            for v in imp_array[idx]
-        ]
+        colors = ["#C44E52" if v < 0 else cmap_color for v in imp_array[idx]]
 
         ax.barh(
             np.array(feature_names)[idx],
@@ -88,16 +88,16 @@ def plot_feature_importance(pipeline, feature_names, output_dir: Path, model_nam
 
 
 def plot_feature_importance_using_permutation_importance(
-        pipeline,
-        feature_names,
-        X_test,
-        y_test,
-        le: LabelEncoder,
-        output_dir: Path,
-        model_name: str,
-        top_n: int = 10,
-        n_repeats: int = 10,
-        random_state: int = 42,
+    pipeline,
+    feature_names,
+    X_test,
+    y_test,
+    le: LabelEncoder,
+    output_dir: Path,
+    model_name: str,
+    top_n: int = 10,
+    n_repeats: int = 10,
+    random_state: int = 42,
 ) -> None:
 
     classes = le.classes_
@@ -107,6 +107,7 @@ def plot_feature_importance_using_permutation_importance(
     all_importances = []
 
     for class_idx, class_name in enumerate(classes):
+
         def _binary_f1(estimator, X, y, _idx=class_idx):
             y_pred = estimator.predict(X)
             return f1_score(y == _idx, y_pred == _idx, average="binary")
@@ -131,7 +132,8 @@ def plot_feature_importance_using_permutation_importance(
     x_lim = (-abs_max * 0.15, abs_max * 1.15)
 
     fig, axes = plt.subplots(
-        1, n_classes,
+        1,
+        n_classes,
         figsize=(5 * n_classes, 5),
         squeeze=False,
     )
@@ -150,7 +152,11 @@ def plot_feature_importance_using_permutation_importance(
         ax.set_title(f"class: {class_name}", fontsize=10)
         ax.set_xlabel("Mean F1 drop (permutation)")
 
-    fig.suptitle(f"Top {top_n} Features per Class — {model_name}",fontsize=12, y=1.02,)
+    fig.suptitle(
+        f"Top {top_n} Features per Class — {model_name}",
+        fontsize=12,
+        y=1.02,
+    )
 
     filename = f"{model_name.replace(' ', '_').lower()}_feature_importance_using_permutation_importance.png"
 

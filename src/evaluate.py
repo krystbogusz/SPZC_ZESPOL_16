@@ -1,7 +1,15 @@
 import json
 from pathlib import Path
 
-from sklearn.metrics import classification_report, accuracy_score, f1_score, precision_score, recall_score, roc_curve, auc, balanced_accuracy_score, matthews_corrcoef
+from sklearn.metrics import (
+    classification_report,
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+    balanced_accuracy_score,
+    matthews_corrcoef,
+)
 
 
 def evaluate(y_test, y_pred, output_dir: Path, model_name: str):
@@ -22,7 +30,7 @@ def get_classification_metrics(y_pred, y_test, output_dir: Path) -> dict:
         "f1_micro": f1_score(y_test, y_pred, average="micro"),
         "f1_macro": f1_score(y_test, y_pred, average="macro"),
         "f1_weighted": f1_score(y_test, y_pred, average="weighted"),
-        "mcc": matthews_corrcoef(y_test, y_pred)
+        "mcc": matthews_corrcoef(y_test, y_pred),
     }
 
     json.dump(metrics, open(output_dir / "metrics.json", "w"), indent=4)

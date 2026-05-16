@@ -12,9 +12,7 @@ def download_datasets():
         dataset_identifier="moutasmtamimi/malicious-url-detection-dataset-enhanced-2026"
     )
 
-    downloader.download_dataset(
-        dataset_identifier="sid321axn/malicious-urls-dataset"
-    )
+    downloader.download_dataset(dataset_identifier="sid321axn/malicious-urls-dataset")
 
     downloader.download_dataset(
         dataset_identifier="samahsadiq/benign-and-malicious-urls"
@@ -34,23 +32,18 @@ def process_raw_dataset(csv_path, url_column, label_column):
         df = df[1:].reset_index(drop=True)
         if url_column not in df.columns or label_column not in df.columns:
             raise ValueError(
-                f"Brak oczekiwanych nazw kolumn: "
-                f"'{url_column}' oraz '{label_column}'."
+                f"Brak oczekiwanych nazw kolumn: '{url_column}' oraz '{label_column}'."
             )
 
-    label_counts = df.groupby(url_column)[label_column].transform('nunique')
+    label_counts = df.groupby(url_column)[label_column].transform("nunique")
     df = df[label_counts == 1].copy()
 
-    features_df = df[url_column].apply(
-        extractor.extract_features
-    ).apply(pd.Series)
+    features_df = df[url_column].apply(extractor.extract_features).apply(pd.Series)
 
     final_df = pd.concat([df[[url_column, label_column]], features_df], axis=1)
-    final_df = final_df.rename(
-        columns={url_column: 'url', label_column: 'type'}
-    )
+    final_df = final_df.rename(columns={url_column: "url", label_column: "type"})
 
-    columns_to_save = ['url'] + list(features_df.columns) + ['type']
+    columns_to_save = ["url"] + list(features_df.columns) + ["type"]
     final_df = final_df[columns_to_save]
 
     final_df.to_csv(output_path, index=False)

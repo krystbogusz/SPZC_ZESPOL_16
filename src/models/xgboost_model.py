@@ -5,25 +5,39 @@ from xgboost import XGBClassifier
 
 from config import RUNS_DIR, FINAL_DATASET
 from evaluate import get_predictions, evaluate
-from plots import plot_feature_importance, plot_confusion_matrix, plot_feature_importance_using_permutation_importance
-from training_utils import split_dataset, compute_class_weigths, get_timestamp, load_data
+from plots import (
+    plot_feature_importance,
+    plot_confusion_matrix,
+    plot_feature_importance_using_permutation_importance,
+)
+from training_utils import (
+    split_dataset,
+    compute_class_weigths,
+    get_timestamp,
+    load_data,
+)
 
 
 def build_xgboost_pipeline(class_weights_str: dict, le: LabelEncoder) -> Pipeline:
     xgb_weights = {i: class_weights_str[cls] for i, cls in enumerate(le.classes_)}
 
-    return Pipeline([
-            ("clf", XGBClassifier(
-                n_estimators=300,
-                max_depth=6,
-                learning_rate=0.1,
-                subsample=0.8,
-                colsample_bytree=0.8,
-                eval_metric="mlogloss",
-                n_jobs=-1,
-                random_state=42
-            )),
-        ])
+    return Pipeline(
+        [
+            (
+                "clf",
+                XGBClassifier(
+                    n_estimators=300,
+                    max_depth=6,
+                    learning_rate=0.1,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    eval_metric="mlogloss",
+                    n_jobs=-1,
+                    random_state=42,
+                ),
+            ),
+        ]
+    )
 
 
 def train_xgboost(X, y):
@@ -73,10 +87,19 @@ def main():
     rng = np.random.default_rng(42)
     idx = rng.choice(len(X_test), 5_000, replace=False)
 
-    plot_feature_importance_using_permutation_importance(pipeline, feature_names, X_test.iloc[idx], y_test[idx], le, current_runs_dir, model_name, n_repeats=5)
+    plot_feature_importance_using_permutation_importance(
+        pipeline,
+        feature_names,
+        X_test.iloc[idx],
+        y_test[idx],
+        le,
+        current_runs_dir,
+        model_name,
+        n_repeats=5,
+    )
 
     print("Done!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

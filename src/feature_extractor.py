@@ -3,7 +3,6 @@ from urllib.parse import urlparse
 
 
 class FeatureExtractor:
-
     def extract_features(self, url):
         parsed = urlparse(url)
         return {
@@ -21,7 +20,7 @@ class FeatureExtractor:
             "has_at_symbol": self.has_at_symbol(url),
             "num_dots_in_hostname": self.get_num_dots_in_hostname(parsed),
             "has_hyphen_in_hostname": self.has_hyphen_in_hostname(parsed),
-            "has_port": self.has_port(parsed)
+            "has_port": self.has_port(parsed),
         }
 
     def get_url_to_path_length(self, parsed):
@@ -40,7 +39,7 @@ class FeatureExtractor:
         return 1 if parsed.netloc.startswith("www.") else 0
 
     def has_tld(self, parsed):
-        parts = parsed.netloc.split('.')
+        parts = parsed.netloc.split(".")
         return 1 if len(parts) > 1 and parts[-1].isalpha() else 0
 
     def has_decimal_in_hostname(self, parsed):
@@ -50,11 +49,11 @@ class FeatureExtractor:
         return len(parsed.path)
 
     def get_num_subdirectories(self, parsed):
-        subdirs = [s for s in parsed.path.split('/') if s]
+        subdirs = [s for s in parsed.path.split("/") if s]
         return len(subdirs)
 
     def get_longest_sub_length(self, parsed):
-        subdirs = [s for s in parsed.path.split('/') if s]
+        subdirs = [s for s in parsed.path.split("/") if s]
         if not subdirs:
             return 0
         return len(max(subdirs, key=len))
@@ -71,7 +70,7 @@ class FeatureExtractor:
         return 1 if "@" in url else 0
 
     def get_num_dots_in_hostname(self, parsed):
-        return parsed.netloc.count('.')
+        return parsed.netloc.count(".")
 
     def has_hyphen_in_hostname(self, parsed):
         return 1 if "-" in parsed.netloc else 0
