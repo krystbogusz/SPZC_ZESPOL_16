@@ -24,9 +24,7 @@ def plot_confusion_matrix(y_test, y_pred, output_dir: Path, model_name: str, le)
     plt.close(fig)
 
 
-def plot_feature_importance(
-    pipeline, feature_names, output_dir: Path, model_name: str, top_n: int = 10
-):
+def plot_feature_importance(pipeline, feature_names, output_dir: Path, model_name: str, top_n: int = 10):
     model = pipeline[-1] if hasattr(pipeline, "steps") else pipeline
 
     if hasattr(model, "coef_"):
@@ -46,8 +44,7 @@ def plot_feature_importance(
         show_zero_line = False
     else:
         raise AttributeError(
-            f"Model '{model_name}' does not expose coef_ or feature_importances_. "
-            "Cannot plot feature importances."
+            f"Model '{model_name}' does not expose coef_ or feature_importances_. Cannot plot feature importances."
         )
 
     n_plots = len(importances)

@@ -8,15 +8,11 @@ from config import PROCESSED_DATA_DIR
 def download_datasets():
     downloader = KaggleDatasetDownloader()
 
-    downloader.download_dataset(
-        dataset_identifier="moutasmtamimi/malicious-url-detection-dataset-enhanced-2026"
-    )
+    downloader.download_dataset(dataset_identifier="moutasmtamimi/malicious-url-detection-dataset-enhanced-2026")
 
     downloader.download_dataset(dataset_identifier="sid321axn/malicious-urls-dataset")
 
-    downloader.download_dataset(
-        dataset_identifier="samahsadiq/benign-and-malicious-urls"
-    )
+    downloader.download_dataset(dataset_identifier="samahsadiq/benign-and-malicious-urls")
 
 
 def process_raw_dataset(csv_path, url_column, label_column):
@@ -31,9 +27,7 @@ def process_raw_dataset(csv_path, url_column, label_column):
         df.columns = df.iloc[0]
         df = df[1:].reset_index(drop=True)
         if url_column not in df.columns or label_column not in df.columns:
-            raise ValueError(
-                f"Brak oczekiwanych nazw kolumn: '{url_column}' oraz '{label_column}'."
-            )
+            raise ValueError(f"Brak oczekiwanych nazw kolumn: '{url_column}' oraz '{label_column}'.")
 
     label_counts = df.groupby(url_column)[label_column].transform("nunique")
     df = df[label_counts == 1].copy()
