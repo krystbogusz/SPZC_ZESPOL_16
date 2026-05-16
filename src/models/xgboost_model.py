@@ -1,34 +1,38 @@
 import numpy as np
-from sklearn.svm import LinearSVC
-from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import LabelEncoder
+from xgboost import XGBClassifier
 
-from config import FINAL_DATASET, RUNS_DIR
-from evaluate import evaluate, get_predictions
+from config import RUNS_DIR, FINAL_DATASET
+from evaluate import get_predictions, evaluate
 from plots import (
-    plot_confusion_matrix,
     plot_feature_importance,
+    plot_confusion_matrix,
     plot_feature_importance_using_permutation_importance,
 )
 from training_utils import (
-    load_data,
-    compute_class_weigths,
     split_dataset,
+    compute_class_weigths,
     get_timestamp,
+    load_data,
 )
 
 
-def build_svm_pipeline(class_weights: dict) -> Pipeline:
+def build_xgboost_pipeline(class_weights_str: dict, le: LabelEncoder) -> Pipeline:
+    xgb_weights = {i: class_weights_str[cls] for i, cls in enumerate(le.classes_)}
+
     return Pipeline(
         [
-            ("scaler", StandardScaler()),
             (
-                "svm",
-                LinearSVC(
-                    C=1.0,
-                    max_iter=2000,
-                    class_weight=class_weights,
-                    dual="auto",
+                "clf",
+                XGBClassifier(
+                    n_estimators=300,
+                    max_depth=6,
+                    learning_rate=0.1,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    eval_metric="mlogloss",
+                    n_jobs=-1,
                     random_state=42,
                 ),
             ),
@@ -36,25 +40,27 @@ def build_svm_pipeline(class_weights: dict) -> Pipeline:
     )
 
 
-def train_svm(X, y):
+def train_xgboost(X, y):
     le = LabelEncoder()
     y_enc = le.fit_transform(y)
 
     X_test, X_train, y_test, y_train = split_dataset(X, y_enc)
 
-    class_weights = compute_class_weigths(y_train)
+    class_weights_int = compute_class_weigths(y_train)
+    class_weights_str = {le.classes_[k]: v for k, v in class_weights_int.items()}
+    sample_weight_train = np.array([class_weights_int[c] for c in y_train])
 
-    pipeline = build_svm_pipeline(class_weights)
-    pipeline.fit(X_train, y_train)
+    pipeline = build_xgboost_pipeline(class_weights_str, le)
+    pipeline.fit(X_train, y_train, clf__sample_weight=sample_weight_train)
 
     return pipeline, X_test, X_train, y_test, y_train, le
 
 
 def main():
-    model_name = "SVM (LinearSVC)"
+    model_name = "XGBoost"
 
     current_timestamp = get_timestamp()
-    current_runs_dir = RUNS_DIR / f"svm_run_{current_timestamp}"
+    current_runs_dir = RUNS_DIR / f"xgboost_run_{current_timestamp}"
     current_runs_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Model name: {model_name}")
@@ -66,7 +72,7 @@ def main():
     print(f"Loaded {len(X):,} rows | Features: {X.shape[1]}")
     print(f"Training {model_name}...")
 
-    pipeline, X_test, X_train, y_test, y_train, le = train_svm(X, y)
+    pipeline, X_test, X_train, y_test, y_train, le = train_xgboost(X, y)
 
     print(f"Evaluating {model_name}...")
 

@@ -1,34 +1,34 @@
 import numpy as np
-from sklearn.svm import LinearSVC
-from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.linear_model import LogisticRegression
 
-from config import FINAL_DATASET, RUNS_DIR
+from config import RUNS_DIR, FINAL_DATASET
 from evaluate import evaluate, get_predictions
 from plots import (
-    plot_confusion_matrix,
     plot_feature_importance,
+    plot_confusion_matrix,
     plot_feature_importance_using_permutation_importance,
 )
 from training_utils import (
-    load_data,
-    compute_class_weigths,
-    split_dataset,
     get_timestamp,
+    load_data,
+    split_dataset,
+    compute_class_weigths,
 )
 
 
-def build_svm_pipeline(class_weights: dict) -> Pipeline:
+def build_lr_pipeline(class_weights: dict) -> Pipeline:
     return Pipeline(
         [
             ("scaler", StandardScaler()),
             (
-                "svm",
-                LinearSVC(
+                "clf",
+                LogisticRegression(
                     C=1.0,
-                    max_iter=2000,
+                    max_iter=1000,
                     class_weight=class_weights,
-                    dual="auto",
+                    solver="saga",
                     random_state=42,
                 ),
             ),
@@ -36,7 +36,7 @@ def build_svm_pipeline(class_weights: dict) -> Pipeline:
     )
 
 
-def train_svm(X, y):
+def train_lr(X, y):
     le = LabelEncoder()
     y_enc = le.fit_transform(y)
 
@@ -44,17 +44,17 @@ def train_svm(X, y):
 
     class_weights = compute_class_weigths(y_train)
 
-    pipeline = build_svm_pipeline(class_weights)
+    pipeline = build_lr_pipeline(class_weights)
     pipeline.fit(X_train, y_train)
 
     return pipeline, X_test, X_train, y_test, y_train, le
 
 
 def main():
-    model_name = "SVM (LinearSVC)"
+    model_name = "Logistic Regression"
 
     current_timestamp = get_timestamp()
-    current_runs_dir = RUNS_DIR / f"svm_run_{current_timestamp}"
+    current_runs_dir = RUNS_DIR / f"lr_run_{current_timestamp}"
     current_runs_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Model name: {model_name}")
@@ -66,7 +66,7 @@ def main():
     print(f"Loaded {len(X):,} rows | Features: {X.shape[1]}")
     print(f"Training {model_name}...")
 
-    pipeline, X_test, X_train, y_test, y_train, le = train_svm(X, y)
+    pipeline, X_test, X_train, y_test, y_train, le = train_lr(X, y)
 
     print(f"Evaluating {model_name}...")
 
