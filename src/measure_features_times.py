@@ -9,8 +9,10 @@ from config import RAW_DATA_DIR, RUNS_DIR
 from feature_extractor import FeatureExtractor
 from timer import Timer
 
+def run_feature_extraction_test():
+    main()
 
-def mian():
+def main():
     csv_files = glob.glob(str(RAW_DATA_DIR / "*.csv"))
     dataframes = {}
 
@@ -122,4 +124,4 @@ def mian():
 
 
 if __name__ == "__main__":
-    mian()
+    main()

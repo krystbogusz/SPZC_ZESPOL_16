@@ -3,7 +3,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
 
-from config import RUNS_DIR, FINAL_DATASET
+from config import RUNS_DIR, FINAL_DATASET, N_REPEATS
 from evaluate import get_predictions, evaluate
 from plots import (
     plot_feature_importance,
@@ -17,6 +17,8 @@ from training_utils import (
     load_data,
 )
 
+def run_xgboost():
+    main()
 
 def build_xgboost_pipeline(class_weights_str: dict, le: LabelEncoder) -> Pipeline:
     xgb_weights = {i: class_weights_str[cls] for i, cls in enumerate(le.classes_)}
@@ -26,9 +28,9 @@ def build_xgboost_pipeline(class_weights_str: dict, le: LabelEncoder) -> Pipelin
             (
                 "clf",
                 XGBClassifier(
-                    n_estimators=300,
-                    max_depth=6,
-                    learning_rate=0.1,
+                    n_estimators=500,
+                    max_depth=8,
+                    learning_rate=0.05,
                     subsample=0.8,
                     colsample_bytree=0.8,
                     eval_metric="mlogloss",
@@ -95,7 +97,7 @@ def main():
         le,
         current_runs_dir,
         model_name,
-        n_repeats=5,
+        n_repeats=N_REPEATS,
     )
 
     print("Done!")

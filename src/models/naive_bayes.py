@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.svm import LinearSVC
+from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.pipeline import Pipeline
 
@@ -7,56 +7,43 @@ from config import FINAL_DATASET, RUNS_DIR, N_REPEATS
 from evaluate import evaluate, get_predictions
 from plots import (
     plot_confusion_matrix,
-    plot_feature_importance,
     plot_feature_importance_using_permutation_importance,
 )
 from training_utils import (
     load_data,
-    compute_class_weigths,
     split_dataset,
     get_timestamp,
 )
 
-def run_svm():
+def run_nb():
     main()
 
-def build_svm_pipeline(class_weights: dict) -> Pipeline:
+def build_nb_pipeline() -> Pipeline:
     return Pipeline(
         [
             ("scaler", StandardScaler()),
-            (
-                "svm",
-                LinearSVC(
-                    C=0.5,
-                    max_iter=5000,
-                    class_weight=class_weights,
-                    dual=False,
-                    random_state=42,
-                ),
-            ),
+            ("nb", GaussianNB(var_smoothing=1e-8)),
         ]
     )
 
 
-def train_svm(X, y):
+def train_nb(X, y):
     le = LabelEncoder()
     y_enc = le.fit_transform(y)
 
     X_test, X_train, y_test, y_train = split_dataset(X, y_enc)
 
-    class_weights = compute_class_weigths(y_train)
-
-    pipeline = build_svm_pipeline(class_weights)
+    pipeline = build_nb_pipeline()
     pipeline.fit(X_train, y_train)
 
     return pipeline, X_test, X_train, y_test, y_train, le
 
 
 def main():
-    model_name = "SVM (LinearSVC)"
+    model_name = "Naive Bayes"
 
     current_timestamp = get_timestamp()
-    current_runs_dir = RUNS_DIR / f"svm_run_{current_timestamp}"
+    current_runs_dir = RUNS_DIR / f"nb_run_{current_timestamp}"
     current_runs_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Model name: {model_name}")
@@ -68,7 +55,7 @@ def main():
     print(f"Loaded {len(X):,} rows | Features: {X.shape[1]}")
     print(f"Training {model_name}...")
 
-    pipeline, X_test, X_train, y_test, y_train, le = train_svm(X, y)
+    pipeline, X_test, X_train, y_test, y_train, le = train_nb(X, y)
 
     print(f"Evaluating {model_name}...")
 
@@ -78,7 +65,6 @@ def main():
     print(f"Plotting {model_name}...")
 
     plot_confusion_matrix(y_test, y_pred, current_runs_dir, model_name, le)
-    plot_feature_importance(pipeline, feature_names, current_runs_dir, model_name)
 
     rng = np.random.default_rng(42)
     idx = rng.choice(len(X_test), 5_000, replace=False)

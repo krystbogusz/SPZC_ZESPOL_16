@@ -1,4 +1,8 @@
-from src import download_datasets, process_raw_dataset
+from src import (
+    download_datasets, process_raw_dataset,
+    run_feature_extraction_test,
+    run_lr,run_nb,run_rf,run_svm,run_xgboost
+)
 from config import RAW_DATA_DIR
 
 
@@ -21,6 +25,18 @@ def main():
         url_column="url",
         label_column="label",
     )
+
+    run_feature_extraction_test()
+    print("\n------------------------------------\n")
+    run_lr()
+    print("\n------------------------------------\n")
+    run_nb()
+    print("\n------------------------------------\n")
+    run_rf()
+    print("\n------------------------------------\n")
+    run_svm()
+    print("\n------------------------------------\n")
+    run_xgboost()
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.linear_model import LogisticRegression
 
-from config import RUNS_DIR, FINAL_DATASET
+from config import RUNS_DIR, FINAL_DATASET, N_REPEATS
 from evaluate import evaluate, get_predictions
 from plots import (
     plot_feature_importance,
@@ -17,6 +17,9 @@ from training_utils import (
     compute_class_weigths,
 )
 
+def run_lr():
+    main()
+
 
 def build_lr_pipeline(class_weights: dict) -> Pipeline:
     return Pipeline(
@@ -25,8 +28,8 @@ def build_lr_pipeline(class_weights: dict) -> Pipeline:
             (
                 "clf",
                 LogisticRegression(
-                    C=1.0,
-                    max_iter=1000,
+                    C=0.5,
+                    max_iter=3000,
                     class_weight=class_weights,
                     solver="saga",
                     random_state=42,
@@ -89,7 +92,7 @@ def main():
         le,
         current_runs_dir,
         model_name,
-        n_repeats=5,
+        n_repeats=N_REPEATS,
     )
 
     print("Done!")

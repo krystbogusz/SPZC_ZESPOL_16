@@ -10,3 +10,4 @@ FINAL_DATASET = PROCESSED_DATA_DIR / "final_dataset_with_all_features_v3.1.csv"
 
 
 RUNS_DIR = PROJ_ROOT / "runs"
+N_REPEATS = 5

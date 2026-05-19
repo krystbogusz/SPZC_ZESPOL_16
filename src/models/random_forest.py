@@ -3,7 +3,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.pipeline import Pipeline
 
-from config import FINAL_DATASET, RUNS_DIR
+from config import FINAL_DATASET, RUNS_DIR, N_REPEATS
 from evaluate import evaluate, get_predictions
 from plots import (
     plot_confusion_matrix,
@@ -17,6 +17,8 @@ from training_utils import (
     get_timestamp,
 )
 
+def run_rf():
+    main()
 
 def build_rf_pipeline(class_weights: dict) -> Pipeline:
     return Pipeline(
@@ -25,7 +27,9 @@ def build_rf_pipeline(class_weights: dict) -> Pipeline:
             (
                 "rf",
                 RandomForestClassifier(
-                    n_estimators=100,
+                    n_estimators=300,
+                    max_depth=30,
+                    min_samples_split=5,
                     class_weight=class_weights,
                     random_state=42,
                     n_jobs=-1,
@@ -88,7 +92,7 @@ def main():
         le,
         current_runs_dir,
         model_name,
-        n_repeats=5,
+        n_repeats=N_REPEATS,
     )
 
     print("Done!")
