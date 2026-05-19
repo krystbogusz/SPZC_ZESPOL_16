@@ -16,6 +16,7 @@ from training_utils import (
     split_dataset,
     get_timestamp,
 )
+from timer import Timer
 
 def run_rf():
     main()
@@ -48,9 +49,13 @@ def train_rf(X, y):
     class_weights = compute_class_weigths(y_train)
 
     pipeline = build_rf_pipeline(class_weights)
-    pipeline.fit(X_train, y_train)
 
-    return pipeline, X_test, X_train, y_test, y_train, le
+    timer = Timer(logger=None)
+    timer.start()
+    pipeline.fit(X_train, y_train)
+    train_time = timer.stop()
+
+    return pipeline, X_test, X_train, y_test, y_train, le, train_time
 
 
 def main():
@@ -69,12 +74,18 @@ def main():
     print(f"Loaded {len(X):,} rows | Features: {X.shape[1]}")
     print(f"Training {model_name}...")
 
-    pipeline, X_test, X_train, y_test, y_train, le = train_rf(X, y)
+    pipeline, X_test, X_train, y_test, y_train, le, train_time = train_rf(X, y)
+    print(f"Training time: {train_time:.4f} seconds")
 
     print(f"Evaluating {model_name}...")
 
+    timer = Timer(logger=None)
+    timer.start()
     y_pred = get_predictions(pipeline, X_test)
-    evaluate(y_test, y_pred, current_runs_dir, model_name)
+    pred_time = timer.stop()
+    print(f"Prediction time: {pred_time:.4f} seconds")
+
+    evaluate(y_test, y_pred, current_runs_dir, model_name, train_time, pred_time)
 
     print(f"Plotting {model_name}...")
 

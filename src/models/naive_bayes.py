@@ -14,6 +14,7 @@ from training_utils import (
     split_dataset,
     get_timestamp,
 )
+from timer import Timer
 
 def run_nb():
     main()
@@ -34,9 +35,13 @@ def train_nb(X, y):
     X_test, X_train, y_test, y_train = split_dataset(X, y_enc)
 
     pipeline = build_nb_pipeline()
-    pipeline.fit(X_train, y_train)
 
-    return pipeline, X_test, X_train, y_test, y_train, le
+    timer = Timer(logger=None)
+    timer.start()
+    pipeline.fit(X_train, y_train)
+    train_time = timer.stop()
+
+    return pipeline, X_test, X_train, y_test, y_train, le, train_time
 
 
 def main():
@@ -55,12 +60,18 @@ def main():
     print(f"Loaded {len(X):,} rows | Features: {X.shape[1]}")
     print(f"Training {model_name}...")
 
-    pipeline, X_test, X_train, y_test, y_train, le = train_nb(X, y)
+    pipeline, X_test, X_train, y_test, y_train, le, train_time = train_nb(X, y)
+    print(f"Training time: {train_time:.4f} seconds")
 
     print(f"Evaluating {model_name}...")
 
+    timer = Timer(logger=None)
+    timer.start()
     y_pred = get_predictions(pipeline, X_test)
-    evaluate(y_test, y_pred, current_runs_dir, model_name)
+    pred_time = timer.stop()
+    print(f"Prediction time: {pred_time:.4f} seconds")
+
+    evaluate(y_test, y_pred, current_runs_dir, model_name, train_time, pred_time)
 
     print(f"Plotting {model_name}...")
 
